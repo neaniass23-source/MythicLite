@@ -8,9 +8,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <!-- Cambia esto a la versión de Java que exija tu Paper -->
     <java.version>21</java.version>
-    <!-- Cambia esto a la versión de paper-api que coincida con tu servidor -->
     <paper.version>1.21.4-R0.1-SNAPSHOT</paper.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -36,8 +34,26 @@
   </dependencies>
 
   <build>
+    <sourceDirectory>.</sourceDirectory>
     <resources>
-      <resource><directory>src/main/resources</directory><filtering>false</filtering></resource>
+      <resource>
+        <directory>.</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>plugin.yml</include>
+          <include>config.yml</include>
+          <include>items.yml</include>
+          <include>spawners.yml</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>.</directory>
+        <filtering>false</filtering>
+        <targetPath>mobs</targetPath>
+        <includes>
+          <include>ejemplo.yml</include>
+        </includes>
+      </resource>
     </resources>
     <plugins>
       <plugin>
