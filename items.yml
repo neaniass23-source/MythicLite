@@ -1,0 +1,28 @@
+# Items personalizados. Úsalos en drops / equipment con su ID (ej: ESPADA_REY)
+ESPADA_REY:
+  material: NETHERITE_SWORD
+  name: "<gradient:#ff5555:#ffaa00>Espada del Rey</gradient>"
+  lore:
+    - "<gray>Forjada por el Rey Zombi"
+    - "<red>+ Poder real"
+  enchants:
+    sharpness: 6
+    unbreakable: 1
+  unbreakable: true
+  glow: true
+  hide-flags: true
+  # custom-model-data: 1001           # para tu resource pack
+  # item-model: "mythiclite:espada_rey" # (1.21.2+) modelo de tu resource pack
+
+CORONA_REY:
+  material: GOLDEN_HELMET
+  name: "<gold>Corona del Rey"
+  glow: true
+
+VARA_RAYOS:
+  material: BLAZE_ROD
+  name: "<yellow>Vara de Rayos"
+  lore: ["<gray>Click derecho para invocar un rayo"]
+  cooldown: 5
+  commands:
+    - "execute at %player% run summon lightning_bolt ~ ~ ~"

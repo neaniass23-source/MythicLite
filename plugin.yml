@@ -1,0 +1,13 @@
+name: MythicLite
+main: dev.mythiclite.MythicLite
+version: 1.0.0
+api-version: '1.21'
+description: Mobs personalizados con drops, dinero, skills, spawners, modelos y hologramas editables.
+softdepend: [Vault]
+commands:
+  mm:
+    description: Comando principal de MythicLite
+    aliases: [mythiclite, mlite]
+permissions:
+  mythiclite.admin:
+    default: op

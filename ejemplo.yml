@@ -1,0 +1,80 @@
+zombie_rey:
+  type: ZOMBIE
+  name: "<gradient:#ff5555:#ffaa00>Rey Zombi</gradient>"
+  health: 200
+  damage: 8
+  speed: 0.28
+  armor: 6
+  knockback-resistance: 0.5
+  follow-range: 32
+  size: 1.2            # escala real (hitbox incluida)
+  glowing: false
+  exp: 150
+  vanilla-drops: false
+  equipment:
+    helmet: CORONA_REY
+    mainhand: ESPADA_REY
+  drops:               # chance en % (0-100), amount "1-3" o "2"
+    - { item: ESPADA_REY, amount: 1, chance: 10 }
+    - { item: DIAMOND, amount: "1-3", chance: 60 }
+    - { item: ROTTEN_FLESH, amount: "2-5", chance: 100 }
+  money:               # requiere Vault + plugin de economía
+    min: 50
+    max: 120
+    chance: 100
+  skills:
+    - { trigger: ON_SPAWN, type: SOUND, sound: "entity.wither.spawn" }
+    - { trigger: TIMER, type: LIGHTNING, interval: 200, chance: 70, range: 12 }
+    - { trigger: TIMER, type: POTION, interval: 160, effect: slowness, duration: 80, amplifier: 1, range: 8 }
+    - { trigger: ON_DAMAGED, type: KNOCKBACK, chance: 30, strength: 1.2 }
+    - { trigger: ON_ATTACK, type: POTION, chance: 25, effect: wither, duration: 100, amplifier: 0 }
+    - { trigger: TIMER, type: SUMMON, interval: 400, mob: zombie_rey_esbirro, amount: 2, radius: 3 }
+    - { trigger: ON_DEATH, type: MESSAGE, text: "<red>¡%player% ha derrotado al Rey Zombi!", targets: CONTEXT }
+  hologram:
+    enabled: true
+    lines:
+      - "%name%"
+      - "%bar% <white>%health%<gray>/<white>%maxhealth%"
+    offset-y: 0.4
+    scale: 1.0
+    background: default     # default | none | #RRGGBB | #AARRGGBB
+    billboard: CENTER       # CENTER | FIXED | VERTICAL | HORIZONTAL
+    shadow: false
+    see-through: false
+    alignment: CENTER       # CENTER | LEFT | RIGHT
+    line-width: 200
+    view-range: 1.0
+    brightness: -1          # -1 = normal, 0-15 = brillo fijo
+
+zombie_rey_esbirro:
+  type: ZOMBIE
+  name: "<gray>Esbirro del Rey"
+  health: 30
+  damage: 3
+  drops:
+    - { item: ROTTEN_FLESH, amount: "1-2", chance: 100 }
+  money: { min: 2, max: 6, chance: 80 }
+  hologram:
+    lines: ["%name% <red>%health%❤"]
+
+# Ejemplo de mob con forma/skin personalizada (necesita resource pack)
+golem_cristal:
+  type: IRON_GOLEM
+  name: "<aqua>Gólem de Cristal"
+  health: 400
+  damage: 15
+  size: 2.0
+  money: { min: 200, max: 400, chance: 100 }
+  model:
+    enabled: false                       # ponlo en true cuando tengas tu modelo
+    material: PAPER
+    item-model: "mythiclite:golem_cristal" # assets/mythiclite/items/golem_cristal.json
+    # custom-model-data: 1            # alternativa
+    # head-texture: "<base64 de textura>"  # skin tipo cabeza de jugador, sin resource pack
+    scale: 2.0
+    offset-y: 1.0
+    hide-base: true
+    follow-yaw: true
+    transform: NONE                      # NONE | HEAD | FIXED | GROUND | GUI ...
+  hologram:
+    offset-y: 1.2

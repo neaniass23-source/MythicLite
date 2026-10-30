@@ -1,0 +1,6 @@
+# Cada cuántos ticks se actualizan hologramas / skills / rotación de modelos (4 = 5 veces por segundo)
+update-ticks: 4
+# Los mobs solo se procesan si hay un jugador a menos de estos bloques (optimización)
+active-range: 64
+messages:
+  money-received: "<gold>+%amount% <gray>por matar a <white>%mob%"
