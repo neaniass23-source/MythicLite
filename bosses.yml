@@ -1,0 +1,23 @@
+# Bosses con ciclo automatico.
+# interval = segundos entre apariciones | lifetime = segundos que dura si nadie lo mata
+# La posicion se guarda con /mm boss set <id> (parado donde quieras que aparezca).
+# Comandos: /mm boss list | set <id> | spawn <id> | despawn <id>
+# Variables en mensajes: %boss% (nombre del mob) y %player% (quien lo mato).
+bosses:
+  leviatan:
+    mob: leviatan_ancestral
+    interval: 3600
+    lifetime: 1800
+    announce: all            # all = todo el servidor | world = solo el mundo del boss
+    sounds:
+      spawn: "entity.wither.spawn"
+      kill: "ui.toast.challenge_complete"
+    messages:
+      spawn: "<#d4a5ff>☠ %boss% <#ffd6e0>ʜᴀ ᴅᴇꜱᴘᴇʀᴛᴀᴅᴏ ᴇɴ ʟᴀꜱ ᴘʀᴏꜰᴜɴᴅɪᴅᴀᴅᴇꜱ ᴅᴇ ʟᴀ ᴅᴜɴɢᴇᴏɴ!"
+      despawn: "<#c7ceea>☠ %boss% <#c7ceea>ꜱᴇ ʜᴀ ᴅᴇꜱᴠᴀɴᴇᴄɪᴅᴏ ᴅᴇ ɴᴜᴇᴠᴏ ᴇɴ ʟᴀꜱ ᴘʀᴏꜰᴜɴᴅɪᴅᴀᴅᴇꜱ..."
+      kill: "<#a8e6cf>☠ <#ffffff>%player% <#a8e6cf>ʜᴀ ᴅᴇʀʀᴏᴛᴀᴅᴏ ᴀ %boss%<#a8e6cf>!"
+      unknown-killer: "ᴀʟɢᴜɪᴇɴ"
+    thresholds:             # al bajar de ese % de vida invoca mobs
+      - { percent: 75, mob: brasa_fundida, amount: 2, radius: 5, message: "<#ffaa88>♨ %boss% <#ffd6e0>ɪɴᴠᴏᴄᴀ ᴀ ꜱᴜꜱ ꜱɪᴇʀᴠᴏꜱ!" }
+      - { percent: 50, mob: brasa_fundida, amount: 3, radius: 5, message: "<#ffaa88>♨ %boss% <#ffd6e0>ɪɴᴠᴏᴄᴀ ᴀ ꜱᴜꜱ ꜱɪᴇʀᴠᴏꜱ!" }
+      - { percent: 25, mob: brasa_fundida, amount: 4, radius: 5, message: "<#ffaa88>♨ %boss% <#ffd6e0>ɪɴᴠᴏᴄᴀ ᴀ ꜱᴜꜱ ᴜʟᴛɪᴍᴏꜱ ꜱɪᴇʀᴠᴏꜱ!" }

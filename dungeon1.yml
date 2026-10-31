@@ -1,0 +1,150 @@
+# ===== DUNGEON 1 =====
+# Nombres, mensajes y hologramas en letras pequenas con colores pastel (sin q ni ene).
+# Para dar skin con textura de cabeza: /mm model <mob> texture <base64>  (o rellena model: abajo y pon enabled: true)
+# Recompensas: /mm rewards <mob>  (menu dentro del juego)
+
+ahogado_ruinas:
+  type: DROWNED
+  name: "<#a8e6cf>⚔ ᴀʜᴏɢᴀᴅᴏ ᴅᴇ ʀᴜɪɴᴀꜱ <#d6e6ff>ɪ"
+  health: 40
+  damage: 4
+  speed: 0.26
+  armor: 2
+  size: 1.15
+  exp: 10
+  vanilla-drops: false
+  equipment:
+    helmet: CASCO_AHOGADO
+    chestplate: PECHERA_AHOGADO
+  drops:
+    - { item: LANZA_LEVIATAN, amount: 1, chance: 5 }
+  money: { min: 1, max: 1, chance: 20 }
+  points: { min: 1, max: 1, chance: 20 }
+  skills:
+    - { trigger: ON_DEATH, type: PARTICLE, particle: soul, count: 25, spread: 0.4 }
+  hologram:
+    enabled: true
+    lines:
+      - "%name%"
+      - "%bar% <#ffffff>%health%<#aaaaaa>/<#ffffff>%maxhealth%"
+    offset-y: 0.45
+    scale: 1.0
+    background: none
+    billboard: CENTER
+    shadow: true
+  model:
+    enabled: false
+    head-texture: ""        # base64 de la textura (minecraft-heads.com)
+    scale: 1.2
+    offset-y: 0.0
+
+centinela_abisal:
+  type: HUSK
+  name: "<#ffd3b6>☀ ᴄᴇɴᴛɪɴᴇʟᴀ ᴀʙɪꜱᴀʟ <#d6e6ff>ɪɪ"
+  health: 120
+  damage: 8
+  speed: 0.27
+  armor: 6
+  knockback-resistance: 0.3
+  size: 1.3
+  exp: 25
+  vanilla-drops: false
+  equipment:
+    helmet: CASCO_CENTINELA
+    chestplate: PECHERA_CENTINELA
+  drops:
+    - { item: LANZA_LEVIATAN, amount: 1, chance: 5 }
+  money: { min: 3, max: 3, chance: 20 }
+  points: { min: 3, max: 3, chance: 20 }
+  skills:
+    - { trigger: ON_ATTACK, type: POTION, chance: 25, effect: slowness, duration: 60, amplifier: 0 }
+    - { trigger: ON_DEATH, type: PARTICLE, particle: soul, count: 30, spread: 0.5 }
+  hologram:
+    enabled: true
+    lines:
+      - "%name%"
+      - "%bar% <#ffffff>%health%<#aaaaaa>/<#ffffff>%maxhealth%"
+    offset-y: 0.5
+    scale: 1.0
+    background: none
+    billboard: CENTER
+    shadow: true
+  model:
+    enabled: false
+    head-texture: ""
+    scale: 1.3
+    offset-y: 0.0
+
+# Mob invocado por el boss (solo aparece cuando el boss baja de vida)
+brasa_fundida:
+  type: BLAZE
+  name: "<#ffaaa5>♨ ʙʀᴀꜱᴀ ꜰᴜɴᴅɪᴅᴀ <#d6e6ff>ɪɪɪ"
+  health: 60
+  damage: 6
+  exp: 15
+  vanilla-drops: false
+  drops:
+    - { item: LANZA_LEVIATAN, amount: 1, chance: 5 }
+  money: { min: 5, max: 5, chance: 20 }
+  points: { min: 5, max: 5, chance: 20 }
+  skills:
+    - { trigger: ON_DEATH, type: PARTICLE, particle: soul, count: 25, spread: 0.4 }
+  hologram:
+    enabled: true
+    lines:
+      - "%name%"
+      - "%bar% <#ffffff>%health%<#aaaaaa>/<#ffffff>%maxhealth%"
+    offset-y: 0.55
+    scale: 1.0
+    background: none
+    billboard: CENTER
+    shadow: true
+  model:
+    enabled: false
+    head-texture: ""
+    scale: 1.0
+    offset-y: 0.0
+
+# Boss: lo controla bosses.yml (cada hora, desaparece a la media hora, invoca a brasa_fundida)
+leviatan_ancestral:
+  type: DROWNED
+  name: "<gradient:#d4a5ff:#ffb3c6>☠ ʟᴇᴠɪᴀᴛᴀɴ ᴀɴᴄᴇꜱᴛʀᴀʟ</gradient>"
+  health: 15000
+  damage: 18
+  speed: 0.3
+  armor: 10
+  knockback-resistance: 1.0
+  follow-range: 40
+  size: 2.6
+  exp: 500
+  glowing: false
+  vanilla-drops: false
+  equipment:
+    helmet: CASCO_LEVIATAN
+    chestplate: PECHERA_LEVIATAN
+  drops:
+    - { item: LANZA_LEVIATAN, amount: 1, chance: 100 }
+  money: { min: 50, max: 50, chance: 100 }
+  points: { min: 50, max: 50, chance: 100 }
+  skills:
+    - { trigger: ON_SPAWN, type: SOUND, sound: "entity.warden.emerge", volume: 2 }
+    - { trigger: TIMER, type: POTION, interval: 160, effect: slowness, duration: 60, amplifier: 1, range: 10 }
+    - { trigger: TIMER, type: KNOCKBACK, interval: 240, chance: 60, strength: 1.4, range: 5 }
+    - { trigger: ON_ATTACK, type: POTION, chance: 25, effect: weakness, duration: 100, amplifier: 0 }
+    - { trigger: ON_DEATH, type: PARTICLE, particle: soul, count: 80, spread: 1.2 }
+  hologram:
+    enabled: true
+    lines:
+      - "%name%"
+      - "%bar% <#ffffff>%percent%%"
+      - "<#ffb3c6>ʙᴏꜱꜱ"
+    offset-y: 1.2
+    scale: 1.4
+    background: none
+    billboard: CENTER
+    shadow: true
+  model:
+    enabled: false
+    head-texture: ""
+    scale: 2.6
+    offset-y: 0.0

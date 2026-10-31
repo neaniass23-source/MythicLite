@@ -17,6 +17,7 @@ public class SpawnerManager {
         public String id, mob, world;
         public double x, y, z;
         public int interval = 30, max = 5, amount = 1, radius = 4, range = 40;
+        public boolean afterDeath = false;
         public long next = 0;
         public Location loc() { World w = Bukkit.getWorld(world); return w == null ? null : new Location(w, x, y, z); }
     }
@@ -42,6 +43,7 @@ public class SpawnerManager {
             d.x = s.getDouble("x"); d.y = s.getDouble("y"); d.z = s.getDouble("z");
             d.interval = s.getInt("interval", 30); d.max = s.getInt("max", 5); d.amount = s.getInt("amount", 1);
             d.radius = s.getInt("radius", 4); d.range = s.getInt("range", 40);
+            d.afterDeath = s.getBoolean("after-death", false);
             spawners.put(id, d);
         }
     }
@@ -54,6 +56,7 @@ public class SpawnerManager {
             y.set(p + "x", d.x); y.set(p + "y", d.y); y.set(p + "z", d.z);
             y.set(p + "interval", d.interval); y.set(p + "max", d.max); y.set(p + "amount", d.amount);
             y.set(p + "radius", d.radius); y.set(p + "range", d.range);
+            y.set(p + "after-death", d.afterDeath);
         }
         try { y.save(file); } catch (IOException e) { e.printStackTrace(); }
     }
@@ -64,6 +67,12 @@ public class SpawnerManager {
         d.x = l.getBlockX() + 0.5; d.y = l.getY(); d.z = l.getBlockZ() + 0.5;
         spawners.put(id, d); save();
         return d;
+    }
+
+    /** Con after-death: el siguiente spawn tarda 'interval' segundos desde que muere el mob. */
+    public void onMobDeath(String id) {
+        Data d = spawners.get(id);
+        if (d != null && d.afterDeath) d.next = System.currentTimeMillis() + d.interval * 1000L;
     }
 
     public boolean remove(String id) { boolean r = spawners.remove(id) != null; if (r) save(); return r; }
@@ -82,7 +91,7 @@ public class SpawnerManager {
             if (base.getWorld().getNearbyPlayers(base, d.range).isEmpty()) continue;
             MobType t = plugin.mobs().get(d.mob);
             if (t == null) continue;
-            d.next = now + d.interval * 1000L;
+            if (!d.afterDeath) d.next = now + d.interval * 1000L;
             for (int i = 0; i < d.amount && plugin.mobs().countBySpawner(d.id) < d.max; i++)
                 plugin.mobs().spawn(t, randomSpot(base, d.radius), d.id);
         }

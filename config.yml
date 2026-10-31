@@ -1,6 +1,9 @@
-# Cada cuántos ticks se actualizan hologramas / skills / rotación de modelos (4 = 5 veces por segundo)
+# Cada cuantos ticks se actualizan hologramas / skills / rotacion de modelos (4 = 5 veces por segundo)
 update-ticks: 4
-# Los mobs solo se procesan si hay un jugador a menos de estos bloques (optimización)
+# Los mobs solo se procesan si hay un jugador a menos de estos bloques (optimizacion)
 active-range: 64
+# Comando de consola para dar la moneda de PlayerPoints (%player% y %amount%)
+points-command: "playerpoints:bananas give %player% %amount%"
 messages:
-  money-received: "<gold>+%amount% <gray>por matar a <white>%mob%"
+  money-received: "<#ffe08a>+%amount% <#bbbbbb>ᴅᴇ ᴅɪɴᴇʀᴏ"
+  points-received: "<#a8e6cf>+%amount% <#bbbbbb>ᴀʟᴍᴀꜱ"

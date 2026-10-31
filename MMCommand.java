@@ -23,7 +23,7 @@ public class MMCommand implements CommandExecutor, TabCompleter {
         msg(s, "Comandos:");
         for (String l : new String[]{
                 "/mm menu", "/mm reload", "/mm list", "/mm spawn <mob> [cantidad]", "/mm give <jugador> <item> [cantidad]", "/mm killall [mob]",
-                "/mm spawner <create|remove|list|tp|set> ...", "/mm holo <mob> <sub> ...  (info, enable, disable, addline, insertline, setline, removeline, offset, scale, background, billboard, shadow, seethrough, alignment, linewidth, viewrange, brightness)",
+                "/mm spawner <create|remove|list|tp|set> ...  (create <id> <mob> <segundos> = max 1, reaparece tras morir; set <id> afterdeath true = reaparece N segundos despues de morir)", "/mm boss <list|set|spawn|despawn> [id]", "/mm rewards <mob>  (menu de recompensas)", "/mm holo <mob> <sub> ...  (info, enable, disable, addline, insertline, setline, removeline, offset, scale, background, billboard, shadow, seethrough, alignment, linewidth, viewrange, brightness)",
                 "/mm model <mob> <enable|disable|material|itemmodel|cmd|texture|scale|offset|hidebase|followyaw|transform|size> [valor]"})
             s.sendMessage(Text.parse("<dark_gray> - <yellow>" + l));
     }
@@ -56,6 +56,11 @@ public class MMCommand implements CommandExecutor, TabCompleter {
             case "spawner" -> spawner(s, a);
             case "holo" -> holo(s, a);
             case "model" -> model(s, a);
+            case "boss" -> boss(s, a);
+            case "rewards" -> {
+                if (!(s instanceof Player p) || a.length < 2 || plugin.mobs().get(a[1]) == null) { msg(s, "Uso: /mm rewards <mob>"); return true; }
+                plugin.menu().openRewards(p, a[1]);
+            }
             default -> help(s);
         }
         return true;
@@ -67,10 +72,14 @@ public class MMCommand implements CommandExecutor, TabCompleter {
         SpawnerManager sm = plugin.spawners();
         switch (a[1].toLowerCase()) {
             case "create" -> {
-                if (!(s instanceof Player p) || a.length < 4) { msg(s, "Uso: /mm spawner create <id> <mob>"); return; }
+                if (!(s instanceof Player p) || a.length < 4) { msg(s, "Uso: /mm spawner create <id> <mob> [segundos-de-reaparicion]"); return; }
                 if (plugin.mobs().get(a[3]) == null) { msg(s, "<red>Mob no existe."); return; }
-                sm.create(a[2], a[3], p.getLocation());
-                msg(s, "Spawner <white>" + a[2] + "<gray> creado. Ajusta con /mm spawner set.");
+                SpawnerManager.Data nd = sm.create(a[2], a[3], p.getLocation());
+                if (a.length > 4) {   // /mm spawner create <id> <mob> <segundos>: 1 mob a la vez, reaparece N s despues de morir
+                    nd.interval = Math.max(1, parseInt(a[4], 30)); nd.max = 1; nd.amount = 1; nd.afterDeath = true;
+                    sm.save();
+                    msg(s, "Spawner <white>" + a[2] + "<gray> creado: maximo 1, reaparece <white>" + nd.interval + "s<gray> despues de morir.");
+                } else msg(s, "Spawner <white>" + a[2] + "<gray> creado. Ajusta con /mm spawner set.");
             }
             case "remove" -> msg(s, a.length > 2 && sm.remove(a[2]) ? "Eliminado." : "<red>No existe.");
             case "list" -> msg(s, "Spawners: <white>" + String.join(", ", sm.all().keySet()));
@@ -84,6 +93,7 @@ public class MMCommand implements CommandExecutor, TabCompleter {
                 if (d == null) { msg(s, "Uso: /mm spawner set <id> <interval|max|amount|radius|range> <n>"); return; }
                 int v = parseInt(a[4], 1);
                 switch (a[3].toLowerCase()) {
+                    case "afterdeath" -> d.afterDeath = Boolean.parseBoolean(a[4]);
                     case "interval" -> d.interval = Math.max(1, v);
                     case "max" -> d.max = Math.max(1, v);
                     case "amount" -> d.amount = Math.max(1, v);
@@ -94,6 +104,28 @@ public class MMCommand implements CommandExecutor, TabCompleter {
                 sm.save(); msg(s, "Actualizado.");
             }
             default -> msg(s, "<red>Subcomando inválido.");
+        }
+    }
+
+    // ---------- bosses ----------
+    private void boss(CommandSender s, String[] a) {
+        BossManager bm = plugin.bosses();
+        String sub = a.length > 1 ? a[1].toLowerCase() : "list";
+        String id = a.length > 2 ? a[2] : null;
+        switch (sub) {
+            case "list" -> {
+                if (bm.all().isEmpty()) { msg(s, "No hay bosses en bosses.yml"); return; }
+                for (BossManager.Boss b : bm.all().values())
+                    msg(s, "<white>" + b.id + "<gray> mob=" + b.mob + " | posicion=" + (b.hasLoc ? "<green>ok" : "<red>sin definir") + "<gray> | "
+                            + (bm.isActive(b) ? "<red>ACTIVO" : "<gray>proximo en <white>" + bm.timeLeft(b)));
+            }
+            case "set" -> {
+                if (!(s instanceof Player p) || id == null) { msg(s, "Uso: /mm boss set <id>  (guarda tu posicion actual)"); return; }
+                msg(s, bm.setLocation(id, p.getLocation()) ? "Posicion del boss <white>" + id + "<gray> guardada." : "<red>Boss no existe.");
+            }
+            case "spawn" -> msg(s, id != null && bm.forceSpawn(id) ? "Boss invocado." : "<red>No se pudo (no existe, ya esta activo o no tiene posicion).");
+            case "despawn" -> msg(s, id != null && bm.forceDespawn(id) ? "Boss retirado." : "<red>No esta activo.");
+            default -> msg(s, "Uso: /mm boss <list|set|spawn|despawn> [id]");
         }
     }
 
@@ -173,10 +205,11 @@ public class MMCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender s, Command c, String l, String[] a) {
         if (!s.hasPermission("mythiclite.admin")) return List.of();
         List<String> out = new ArrayList<>();
-        if (a.length == 1) out.addAll(List.of("menu", "reload", "list", "spawn", "give", "killall", "spawner", "holo", "model"));
+        if (a.length == 1) out.addAll(List.of("menu", "reload", "list", "spawn", "give", "killall", "spawner", "holo", "model", "boss", "rewards"));
         else if (a.length == 2) {
             switch (a[0].toLowerCase()) {
-                case "spawn", "killall", "holo", "model" -> out.addAll(plugin.mobs().all().keySet());
+                case "spawn", "killall", "holo", "model", "rewards" -> out.addAll(plugin.mobs().all().keySet());
+                case "boss" -> out.addAll(List.of("list", "set", "spawn", "despawn"));
                 case "give" -> Bukkit.getOnlinePlayers().forEach(p -> out.add(p.getName()));
                 case "spawner" -> out.addAll(List.of("create", "remove", "list", "tp", "set"));
                 default -> {}
@@ -186,6 +219,7 @@ public class MMCommand implements CommandExecutor, TabCompleter {
                 case "give" -> out.addAll(plugin.items().ids());
                 case "holo" -> out.addAll(List.of("info", "enable", "disable", "addline", "insertline", "setline", "removeline", "offset", "scale", "background", "billboard", "shadow", "seethrough", "alignment", "linewidth", "viewrange", "brightness"));
                 case "model" -> out.addAll(List.of("enable", "disable", "material", "itemmodel", "cmd", "texture", "scale", "offset", "hidebase", "followyaw", "transform", "size"));
+                case "boss" -> out.addAll(plugin.bosses().all().keySet());
                 case "spawner" -> { if (List.of("remove", "tp", "set").contains(a[1].toLowerCase())) out.addAll(plugin.spawners().all().keySet()); else if (a[1].equalsIgnoreCase("create")) out.add("<id>"); }
                 default -> {}
             }
@@ -198,7 +232,7 @@ public class MMCommand implements CommandExecutor, TabCompleter {
                 default -> {}
             }
             else if (a[0].equalsIgnoreCase("spawner") && a[1].equalsIgnoreCase("create")) out.addAll(plugin.mobs().all().keySet());
-            else if (a[0].equalsIgnoreCase("spawner") && a[1].equalsIgnoreCase("set")) out.addAll(List.of("interval", "max", "amount", "radius", "range"));
+            else if (a[0].equalsIgnoreCase("spawner") && a[1].equalsIgnoreCase("set")) out.addAll(List.of("interval", "max", "amount", "radius", "range", "afterdeath"));
         }
         String last = a[a.length - 1].toLowerCase();
         out.removeIf(x -> !x.toLowerCase().startsWith(last));

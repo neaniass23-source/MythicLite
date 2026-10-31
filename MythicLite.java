@@ -10,6 +10,7 @@ public class MythicLite extends JavaPlugin {
     private ItemManager items;
     private MobManager mobs;
     private SpawnerManager spawners;
+    private BossManager bosses;
     private MenuManager menu;
     private SkillExecutor skills;
     private Economy economy;
@@ -17,13 +18,14 @@ public class MythicLite extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        for (String f : new String[]{"items.yml", "spawners.yml", "mobs/ejemplo.yml"})
+        for (String f : new String[]{"items.yml", "spawners.yml", "bosses.yml", "mobs/ejemplo.yml", "mobs/dungeon1.yml"})
             if (!new File(getDataFolder(), f).exists()) saveResource(f, false);
 
         items = new ItemManager(this);
         skills = new SkillExecutor(this);
         mobs = new MobManager(this);
         spawners = new SpawnerManager(this);
+        bosses = new BossManager(this);
         menu = new MenuManager(this);
 
         getServer().getPluginManager().registerEvents(items, this);
@@ -37,11 +39,13 @@ public class MythicLite extends JavaPlugin {
         reloadAll();
         mobs.start();
         spawners.start();
+        bosses.start();
         getLogger().info("MythicLite activado: " + mobs.all().size() + " mobs, " + items.ids().size() + " items.");
     }
 
     @Override
     public void onDisable() {
+        if (bosses != null) bosses.shutdown();
         if (mobs != null) mobs.shutdown();
         if (spawners != null) spawners.save();
     }
@@ -51,6 +55,7 @@ public class MythicLite extends JavaPlugin {
         items.load();
         mobs.load();
         spawners.load();
+        bosses.load();
     }
 
     public Economy economy() {
@@ -64,6 +69,7 @@ public class MythicLite extends JavaPlugin {
     public ItemManager items() { return items; }
     public MobManager mobs() { return mobs; }
     public SpawnerManager spawners() { return spawners; }
+    public BossManager bosses() { return bosses; }
     public MenuManager menu() { return menu; }
     public SkillExecutor skills() { return skills; }
 }

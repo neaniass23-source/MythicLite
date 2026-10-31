@@ -46,6 +46,8 @@ public class MobManager implements Listener {
     public MobType get(String id) { return types.get(id); }
     public Map<String, MobType> all() { return types; }
     public int activeCount() { return active.size(); }
+    public ActiveMob activeOf(UUID id) { return active.get(id); }
+    public void remove(ActiveMob am) { removeMob(am); }
     public int countBySpawner(String id) { return spawnerCounts.getOrDefault(id, 0); }
 
     // ---------- carga ----------
@@ -98,6 +100,7 @@ public class MobManager implements Listener {
         if (!(ent instanceof LivingEntity le)) { ent.remove(); return null; }
         le.getPersistentDataContainer().set(KEY_MOB, PersistentDataType.STRING, t.id);
         le.setPersistent(false);  // no se guarda con el chunk: evita mobs huérfanos sin holograma
+        le.setRemoveWhenFarAway(false);  // el boss/mobs de dungeon no deben despawnear solos por distancia
         applyStats(le, t);
         ActiveMob am = new ActiveMob(le, t, spawnerId);
         long now = gameTicks;
@@ -285,6 +288,18 @@ public class MobManager implements Listener {
                         .replace("%amount%", eco.format(amt)).replace("%mob%", t.name)));
             }
         }
+        if (killer != null && t.pointsMax > 0 && rnd.nextDouble() * 100 < t.pointsChance) {
+            int pts = (int) Math.round(t.pointsMin + rnd.nextDouble() * (t.pointsMax - t.pointsMin));
+            if (pts > 0) {
+                String cmd = plugin.getConfig().getString("points-command", "playerpoints:bananas give %player% %amount%")
+                        .replace("%player%", killer.getName()).replace("%amount%", String.valueOf(pts));
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                killer.sendActionBar(Text.parse(plugin.getConfig().getString("messages.points-received", "+%amount%")
+                        .replace("%amount%", String.valueOf(pts)).replace("%mob%", t.name)));
+            }
+        }
+        if (am.spawnerId != null) plugin.spawners().onMobDeath(am.spawnerId);
+        plugin.bosses().onMobDeath(am, killer);
         runSkills(am, "ON_DEATH", killer);
     }
 

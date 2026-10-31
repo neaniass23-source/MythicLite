@@ -1,5 +1,6 @@
 package dev.mythiclite;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MenuManager implements Listener {
-    enum Kind { MAIN, MOBS, ITEMS, SPAWNERS }
+    enum Kind { MAIN, MOBS, ITEMS, SPAWNERS, REWARDS }
 
     private static class Holder implements InventoryHolder {
-        final Kind kind; final int page; final List<String> ids = new ArrayList<>(); Inventory inv;
+        final Kind kind; final int page; final List<String> ids = new ArrayList<>(); Inventory inv; String mob;
         Holder(Kind k, int p) { kind = k; page = p; }
         @Override public Inventory getInventory() { return inv; }
     }
@@ -77,7 +78,7 @@ public class MenuManager implements Listener {
                 ItemMeta m = is.getItemMeta();
                 m.lore(List.of(Text.item("<gray>ID: <white>" + id), Text.item("<gray>Vida: <red>" + t.health + " <gray>Tipo: <white>" + t.entity.getKey().getKey()),
                         Text.item("<gray>Drops: <white>" + t.drops.size() + " <gray>Skills: <white>" + t.skills.size()),
-                        Text.item(""), Text.item("<yellow>Click izq: <white>spawnear aquí"), Text.item("<yellow>Click der: <white>obtener huevo")));
+                        Text.item(""), Text.item("<yellow>Click izq: <white>spawnear aquí"), Text.item("<yellow>Click der: <white>obtener huevo"), Text.item("<yellow>Shift+click izq: <white>editar recompensas")));
                 is.setItemMeta(m);
                 return is;
             }
@@ -94,6 +95,7 @@ public class MenuManager implements Listener {
     public void onClick(InventoryClickEvent e) {
         if (!(e.getView().getTopInventory().getHolder() instanceof Holder h)) return;
         e.setCancelled(true);
+        if (h.kind == Kind.REWARDS && e.getWhoClicked() instanceof Player rp && rp.hasPermission("mythiclite.admin")) { rewardsClick(e, h, rp); return; }
         if (!(e.getWhoClicked() instanceof Player p) || e.getClickedInventory() != e.getView().getTopInventory()) return;
         if (!p.hasPermission("mythiclite.admin")) return;
         int slot = e.getRawSlot();
@@ -119,7 +121,8 @@ public class MenuManager implements Listener {
             case MOBS -> {
                 MobType t = plugin.mobs().get(id);
                 if (t == null) return;
-                if (c.isLeftClick()) { plugin.mobs().spawn(t, p.getLocation(), null); p.sendMessage(Text.parse("<green>Spawneado " + id)); }
+                if (c == ClickType.SHIFT_LEFT) openRewards(p, id);
+                else if (c.isLeftClick()) { plugin.mobs().spawn(t, p.getLocation(), null); p.sendMessage(Text.parse("<green>Spawneado " + id)); }
                 else if (c.isRightClick()) p.getInventory().addItem(plugin.mobs().egg(t));
             }
             case ITEMS -> p.getInventory().addItem(plugin.items().get(id, c.isShiftClick() ? 64 : 1));
@@ -131,5 +134,104 @@ public class MenuManager implements Listener {
             }
             default -> {}
         }
+    }
+
+    // ---------- editor de recompensas ----------
+    public void openRewards(Player p, String mobId) {
+        MobType t = plugin.mobs().get(mobId);
+        if (t == null) return;
+        Holder h = new Holder(Kind.REWARDS, 0);
+        h.mob = mobId;
+        h.inv = Bukkit.createInventory(h, 54, Text.parse("<dark_gray>Recompensas » " + mobId));
+        fillRewards(h, t);
+        p.openInventory(h.inv);
+    }
+
+    private String fmt(double d) { return d == Math.floor(d) ? String.valueOf((long) d) : String.valueOf(d); }
+
+    private void fillRewards(Holder h, MobType t) {
+        Inventory inv = h.inv;
+        inv.clear();
+        for (int i = 0; i < 45 && i < t.drops.size(); i++) {
+            MobType.DropEntry d = t.drops.get(i);
+            ItemStack base = plugin.items().resolve(d.item(), d.min());
+            if (base == null) { inv.setItem(i, icon(Material.BARRIER, "<red>Item invalido", "<gray>" + d.item(), "<yellow>Q: <white>borrar")); continue; }
+            ItemMeta m = base.getItemMeta();
+            List<Component> lore = m.lore() == null ? new ArrayList<>() : new ArrayList<>(m.lore());
+            lore.add(Text.item(""));
+            lore.add(Text.item("<gray>Probabilidad: <white>" + fmt(d.chance()) + "%"));
+            lore.add(Text.item("<gray>Cantidad: <white>" + (d.min() == d.max() ? d.min() : d.min() + "-" + d.max())));
+            lore.add(Text.item(""));
+            lore.add(Text.item("<yellow>Click izq/der: <white>probabilidad +5% / -5%"));
+            lore.add(Text.item("<yellow>Shift izq/der: <white>cantidad +1 / -1"));
+            lore.add(Text.item("<yellow>Q: <white>borrar"));
+            m.lore(lore);
+            base.setItemMeta(m);
+            inv.setItem(i, base);
+        }
+        inv.setItem(45, icon(Material.PAPER, "<white>Como se usa", "<gray>Shift+click a un item de TU inventario para anadirlo",
+                "<gray>o coge un item con el cursor y pulsa un hueco vacio", "<gray>Los cambios se guardan solos"));
+        inv.setItem(46, icon(Material.GOLD_INGOT, "<gold>Dinero (Vault)", "<gray>Cantidad: <white>" + fmt(t.moneyMin) + (t.moneyMax != t.moneyMin ? "-" + fmt(t.moneyMax) : ""),
+                "<gray>Probabilidad: <white>" + fmt(t.moneyChance) + "%", "", "<yellow>Izq/der: <white>cantidad +1 / -1", "<yellow>Shift izq/der: <white>probabilidad +5% / -5%"));
+        inv.setItem(47, icon(Material.NETHER_STAR, "<aqua>Puntos (PlayerPoints)", "<gray>Cantidad: <white>" + fmt(t.pointsMin) + (t.pointsMax != t.pointsMin ? "-" + fmt(t.pointsMax) : ""),
+                "<gray>Probabilidad: <white>" + fmt(t.pointsChance) + "%", "", "<yellow>Izq/der: <white>cantidad +1 / -1", "<yellow>Shift izq/der: <white>probabilidad +5% / -5%"));
+        inv.setItem(49, icon(Material.BARRIER, "<red>Volver"));
+        inv.setItem(53, icon(Material.HOPPER, "<green>Anadir item", "<gray>Suelta aqui el item que lleves en el cursor"));
+    }
+
+    private void rewardsClick(InventoryClickEvent e, Holder h, Player p) {
+        MobType t = plugin.mobs().get(h.mob);
+        if (t == null) return;
+        boolean top = e.getClickedInventory() == e.getView().getTopInventory();
+        if (!top) {   // tu inventario: shift+click anade ese item
+            ItemStack it = e.getCurrentItem();
+            if (e.isShiftClick() && it != null && !it.getType().isAir()) addDrop(p, h, t, it);
+            return;
+        }
+        int slot = e.getRawSlot();
+        ItemStack cursor = e.getCursor();
+        boolean hasCursor = cursor != null && !cursor.getType().isAir();
+        if (hasCursor && (slot == 53 || (slot < 45 && slot >= t.drops.size()))) { addDrop(p, h, t, cursor); return; }
+        ClickType c = e.getClick();
+
+        if (slot < 45 && slot < t.drops.size()) {
+            MobType.DropEntry d = t.drops.get(slot);
+            if (c == ClickType.DROP || c == ClickType.CONTROL_DROP) { t.drops.remove(slot); }
+            else {
+                double ch = d.chance();
+                int mn = d.min(), mx = d.max();
+                switch (c) {
+                    case LEFT -> ch = Math.min(100, ch + 5);
+                    case RIGHT -> ch = Math.max(0, ch - 5);
+                    case SHIFT_LEFT -> { mn += 1; mx += 1; }
+                    case SHIFT_RIGHT -> { mn = Math.max(1, mn - 1); mx = Math.max(mn, mx - 1); }
+                    default -> { return; }
+                }
+                t.drops.set(slot, new MobType.DropEntry(d.item(), mn, mx, ch));
+            }
+        } else if (slot == 46 || slot == 47) {
+            boolean money = slot == 46;
+            double mn = money ? t.moneyMin : t.pointsMin, mx = money ? t.moneyMax : t.pointsMax, ch = money ? t.moneyChance : t.pointsChance;
+            switch (c) {
+                case LEFT -> { mn += 1; mx += 1; }
+                case RIGHT -> { mn = Math.max(0, mn - 1); mx = Math.max(mn, mx - 1); }
+                case SHIFT_LEFT -> ch = Math.min(100, ch + 5);
+                case SHIFT_RIGHT -> ch = Math.max(0, ch - 5);
+                default -> { return; }
+            }
+            if (money) { t.moneyMin = mn; t.moneyMax = mx; t.moneyChance = ch; }
+            else { t.pointsMin = mn; t.pointsMax = mx; t.pointsChance = ch; }
+        } else if (slot == 49) { open(p, Kind.MOBS, 0); return; }
+        else return;
+        t.save();
+        fillRewards(h, t);
+    }
+
+    private void addDrop(Player p, Holder h, MobType t, ItemStack item) {
+        if (t.drops.size() >= 45) { p.sendMessage(Text.parse("<red>No caben mas recompensas (maximo 45).")); return; }
+        t.drops.add(new MobType.DropEntry(plugin.items().encode(item), 1, 1, 100));
+        t.save();
+        fillRewards(h, t);
+        p.sendMessage(Text.parse("<green>Recompensa anadida (100%, cantidad 1). Ajustala con los clics."));
     }
 }

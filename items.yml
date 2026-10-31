@@ -26,3 +26,49 @@ VARA_RAYOS:
   cooldown: 5
   commands:
     - "execute at %player% run summon lightning_bolt ~ ~ ~"
+
+# ===== DUNGEON 1 =====
+LANZA_LEVIATAN:
+  material: TRIDENT
+  name: "<gradient:#d4a5ff:#ffb3c6>ʟᴀɴᴢᴀ ᴅᴇʟ ʟᴇᴠɪᴀᴛᴀɴ</gradient>"
+  lore:
+    - "<#c7ceea>ʙᴏᴛɪɴ ᴅᴇʟ ʟᴇᴠɪᴀᴛᴀɴ ᴀɴᴄᴇꜱᴛʀᴀʟ"
+    - "<#ffd6e0>ꜰᴏʀᴊᴀᴅᴀ ᴇɴ ʟᴀꜱ ᴘʀᴏꜰᴜɴᴅɪᴅᴀᴅᴇꜱ"
+  enchants:
+    impaling: 7
+    loyalty: 3
+  unbreakable: true
+  glow: true
+  hide-flags: true
+  # PLACEHOLDER: sustituye este item por el de tu foto con /mm rewards leviatan_ancestral
+
+CASCO_AHOGADO:
+  material: LEATHER_HELMET
+  name: "<#a8e6cf>ᴄᴀꜱᴄᴏ ᴅᴇ ᴀʜᴏɢᴀᴅᴏ"
+  color: "#a8e6cf"
+  hide-flags: true
+PECHERA_AHOGADO:
+  material: LEATHER_CHESTPLATE
+  name: "<#a8e6cf>ᴘᴇᴄʜᴇʀᴀ ᴅᴇ ᴀʜᴏɢᴀᴅᴏ"
+  color: "#a8e6cf"
+  hide-flags: true
+CASCO_CENTINELA:
+  material: LEATHER_HELMET
+  name: "<#ffd3b6>ᴄᴀꜱᴄᴏ ᴅᴇ ᴄᴇɴᴛɪɴᴇʟᴀ"
+  color: "#ffd3b6"
+  hide-flags: true
+PECHERA_CENTINELA:
+  material: LEATHER_CHESTPLATE
+  name: "<#ffd3b6>ᴘᴇᴄʜᴇʀᴀ ᴅᴇ ᴄᴇɴᴛɪɴᴇʟᴀ"
+  color: "#ffd3b6"
+  hide-flags: true
+CASCO_LEVIATAN:
+  material: LEATHER_HELMET
+  name: "<#d4a5ff>ᴄᴀꜱᴄᴏ ᴅᴇʟ ʟᴇᴠɪᴀᴛᴀɴ"
+  color: "#d4a5ff"
+  hide-flags: true
+PECHERA_LEVIATAN:
+  material: LEATHER_CHESTPLATE
+  name: "<#d4a5ff>ᴘᴇᴄʜᴇʀᴀ ᴅᴇʟ ʟᴇᴠɪᴀᴛᴀɴ"
+  color: "#d4a5ff"
+  hide-flags: true

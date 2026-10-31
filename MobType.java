@@ -28,6 +28,7 @@ public class MobType {
     public Map<String, String> equipment = new LinkedHashMap<>();
     public List<DropEntry> drops = new ArrayList<>();
     public double moneyChance = 100, moneyMin = 0, moneyMax = 0;
+    public double pointsChance = 100, pointsMin = 0, pointsMax = 0;
     public List<SkillDef> skills = new ArrayList<>();
     public HologramSettings holo = new HologramSettings();
     public ModelSettings model = new ModelSettings();
@@ -70,6 +71,9 @@ public class MobType {
         ConfigurationSection mo = s.getConfigurationSection("money");
         if (mo != null) { moneyMin = mo.getDouble("min", 0); moneyMax = Math.max(moneyMin, mo.getDouble("max", moneyMin)); moneyChance = mo.getDouble("chance", 100); }
 
+        ConfigurationSection po = s.getConfigurationSection("points");
+        if (po != null) { pointsMin = po.getDouble("min", 0); pointsMax = Math.max(pointsMin, po.getDouble("max", pointsMin)); pointsChance = po.getDouble("chance", 100); }
+
         for (Map<?, ?> m : s.getMapList("skills")) skills.add(new SkillDef(m));
         holo.load(s.getConfigurationSection("hologram"));
         model.load(s.getConfigurationSection("model"));
@@ -80,6 +84,19 @@ public class MobType {
         ConfigurationSection s = cfg.getConfigurationSection(id);
         holo.save(s.createSection("hologram"));
         model.save(s.createSection("model"));
+        List<Map<String, Object>> dl = new ArrayList<>();
+        for (DropEntry d : drops) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("item", d.item());
+            m.put("amount", d.min() == d.max() ? String.valueOf(d.min()) : d.min() + "-" + d.max());
+            m.put("chance", d.chance());
+            dl.add(m);
+        }
+        s.set("drops", dl);
+        ConfigurationSection mo = s.createSection("money");
+        mo.set("min", moneyMin); mo.set("max", moneyMax); mo.set("chance", moneyChance);
+        ConfigurationSection po = s.createSection("points");
+        po.set("min", pointsMin); po.set("max", pointsMax); po.set("chance", pointsChance);
         try { cfg.save(file); } catch (IOException e) { e.printStackTrace(); }
     }
 }
