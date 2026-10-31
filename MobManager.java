@@ -279,6 +279,10 @@ public class MobManager implements Listener {
         }
         if (t.exp >= 0) e.setDroppedExp(t.exp);
         Player killer = e.getEntity().getKiller();
+        if (killer != null) {
+            plugin.stats().addKill(killer, t.id);
+            plugin.quests().onKill(killer, t.id);
+        }
         if (killer != null && t.moneyMax > 0 && rnd.nextDouble() * 100 < t.moneyChance) {
             double amt = Math.round((t.moneyMin + rnd.nextDouble() * (t.moneyMax - t.moneyMin)) * 100.0) / 100.0;
             Economy eco = plugin.economy();

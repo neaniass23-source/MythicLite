@@ -1,0 +1,30 @@
+# Misiones de MythicLite. Se cuentan solas: cada vez que un jugador mata un mob, suma progreso.
+# Los jugadores ven su progreso con /misiones
+#
+# mob: id del mob (el nombre que aparece en /mm list) o "*" para cualquier mob de MythicLite
+# amount: cuántos hay que matar
+# repeatable: true = al completarla vuelve a empezar de 0 y da la recompensa otra vez
+# rewards: comandos que ejecuta la consola. %player% es el nombre del jugador
+messages:
+  complete: "<green>¡Misión completada! <white>%quest%"
+  # Mensaje para todo el servidor (déjalo vacío "" para no avisar a nadie)
+  broadcast: "<yellow>%player% <gray>ha completado la misión <white>%quest%"
+
+quests:
+  esbirros-500:
+    name: "<#ffe08a>Cazador de esbirros"
+    description: "Mata 500 esbirros del Rey Zombi"
+    mob: zombie_rey_esbirro
+    amount: 500
+    repeatable: false
+    rewards:
+      - "playerpoints:bananas give %player% 50"
+
+  matador-1000:
+    name: "<#ff5555>Matador"
+    description: "Mata 1000 mobs de MythicLite"
+    mob: "*"
+    amount: 1000
+    repeatable: false
+    rewards:
+      - "playerpoints:bananas give %player% 200"

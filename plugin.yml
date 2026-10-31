@@ -3,11 +3,18 @@ main: dev.mythiclite.MythicLite
 version: 1.0.0
 api-version: '1.21'
 description: Mobs personalizados con drops, dinero, skills, spawners, modelos y hologramas editables.
-softdepend: [Vault, PlayerPoints]
+softdepend: [Vault, PlayerPoints, PlaceholderAPI]
 commands:
   mm:
     description: Comando principal de MythicLite
     aliases: [mythiclite, mlite]
+  mtop:
+    description: Top de kills de mobs
+    usage: /mtop [mob]
+    aliases: [topmobs, killtop]
+  misiones:
+    description: Tu progreso en las misiones
+    aliases: [quests]
 permissions:
   mythiclite.admin:
     default: op

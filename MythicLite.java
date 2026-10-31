@@ -12,13 +12,15 @@ public class MythicLite extends JavaPlugin {
     private SpawnerManager spawners;
     private BossManager bosses;
     private MenuManager menu;
+    private StatsManager stats;
+    private QuestManager quests;
     private SkillExecutor skills;
     private Economy economy;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        for (String f : new String[]{"items.yml", "spawners.yml", "bosses.yml", "mobs/ejemplo.yml", "mobs/dungeon1.yml"})
+        for (String f : new String[]{"items.yml", "spawners.yml", "bosses.yml", "quests.yml", "mobs/ejemplo.yml", "mobs/dungeon1.yml"})
             if (!new File(getDataFolder(), f).exists()) saveResource(f, false);
 
         items = new ItemManager(this);
@@ -27,6 +29,9 @@ public class MythicLite extends JavaPlugin {
         spawners = new SpawnerManager(this);
         bosses = new BossManager(this);
         menu = new MenuManager(this);
+        stats = new StatsManager(this);
+        quests = new QuestManager(this);
+        stats.load();
 
         getServer().getPluginManager().registerEvents(items, this);
         getServer().getPluginManager().registerEvents(mobs, this);
@@ -36,7 +41,15 @@ public class MythicLite extends JavaPlugin {
         getCommand("mm").setExecutor(cmd);
         getCommand("mm").setTabCompleter(cmd);
 
+        StatsCommand sc = new StatsCommand(this);
+        for (String name : new String[]{"mtop", "misiones"}) {
+            getCommand(name).setExecutor(sc);
+            getCommand(name).setTabCompleter(sc);
+        }
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) hookPlaceholders();
+
         reloadAll();
+        stats.start();
         mobs.start();
         spawners.start();
         bosses.start();
@@ -48,6 +61,7 @@ public class MythicLite extends JavaPlugin {
         if (bosses != null) bosses.shutdown();
         if (mobs != null) mobs.shutdown();
         if (spawners != null) spawners.save();
+        if (stats != null) stats.shutdown();
     }
 
     public void reloadAll() {
@@ -56,6 +70,12 @@ public class MythicLite extends JavaPlugin {
         mobs.load();
         spawners.load();
         bosses.load();
+        quests.load();
+    }
+
+    private void hookPlaceholders() {
+        new MythicExpansion(this).register();
+        getLogger().info("PlaceholderAPI detectado: placeholders %mythiclite_...% registrados.");
     }
 
     public Economy economy() {
@@ -72,4 +92,6 @@ public class MythicLite extends JavaPlugin {
     public BossManager bosses() { return bosses; }
     public MenuManager menu() { return menu; }
     public SkillExecutor skills() { return skills; }
+    public StatsManager stats() { return stats; }
+    public QuestManager quests() { return quests; }
 }
